@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/eliasbenb/PlexAniBridge-Mappings/v2/mappings.schema.json
+
+"16498":
+  anidb_id: 9541
+  imdb_id: "tt2560140"
+  mal_id: 16498
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s1: ""
+
+"20958":
+  anidb_id: 10944
+  imdb_id: "tt2560140"
+  mal_id: 25777
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s2: ""
+
+"99147":
+  anidb_id: 13241
+  imdb_id: "tt2560140"
+  mal_id: 35760
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s3: "e1-e12"
+
+"104578":
+  anidb_id: 14444
+  imdb_id: "tt2560140"
+  mal_id: 38524
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s3: "e13-e22"
+
+"110277":
+  anidb_id: 14977
+  imdb_id: "tt2560140"
+  mal_id: 40028
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s4: "e1-e16"
+
+"131681":
+  anidb_id: 16177
+  imdb_id: "tt2560140"
+  mal_id: 48583
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s4: "e17-e28"
+
+"146984":
+  anidb_id: 17303
+  imdb_id: "tt2560140"
+  mal_id: 51535
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s4: "e29"
+
+"162314":
+  anidb_id: 17303
+  imdb_id: "tt2560140"
+  mal_id: 51535
+  tmdb_show_id: 1429
+  tvdb_id: 267440
+  tvdb_mappings:
+    s4: "e30"

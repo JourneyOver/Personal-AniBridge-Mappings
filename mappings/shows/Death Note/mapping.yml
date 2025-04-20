@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/eliasbenb/PlexAniBridge-Mappings/v2/mappings.schema.json
+
+"1535":
+  anidb_id: 4563
+  imdb_id: "tt0877057"
+  mal_id: 1535
+  tmdb_show_id: 13916
+  tvdb_id: 79481
+  tvdb_mappings:
+    s1: ""
