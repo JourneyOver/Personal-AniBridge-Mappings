@@ -1,0 +1,182 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
+
+anidb:11995:s1:
+  anilist:21700:
+    1-12: 1-12
+  mal:32951:
+    1-12: 1-12
+  tmdb_show:70637:s1:
+    1-12: 1-12
+  tvdb_show:318950:s1:
+    1-12: 1-12
+anidb:18581:s1:
+  anilist:176642:
+    1-12: 1-12
+  mal:58600:
+    1-12: 1-12
+  tmdb_show:250994:s1:
+    1-12: 1-12
+  tvdb_show:448477:s1:
+    1-12: 1-12
+anidb:19324:s1:
+  anilist:192261:
+    1-12: 1-12
+  mal:61637:
+    1-12: 1-12
+  tmdb_show:290667:s1:
+    1-12: 1-12
+  tvdb_show:463334:s1:
+    1-12: 1-12
+anidb:6564:s1:
+  anilist:6547:
+    1-13: 1-13
+  mal:6547:
+    1-13: 1-13
+  tmdb_show:42942:s1:
+    1-13: 1-13
+  tvdb_show:150471:s1:
+    1-13: 1-13
+anidb:9541:s1:
+  anilist:16498:
+    1-25: 1-25
+  mal:16498:
+    1-25: 1-25
+  tmdb_show:1429:s1:
+    1-25: 1-25
+  tvdb_show:267440:s1:
+    1-25: 1-25
+anidb:10944:s1:
+  anilist:20958:
+    1-12: 1-12
+  mal:25777:
+    1-12: 1-12
+  tmdb_show:1429:s2:
+    1-12: 1-12
+  tvdb_show:267440:s2:
+    1-12: 1-12
+anidb:12189:s1:
+  anilist:99147:
+    1-12: 1-12
+  mal:35760:
+    1-12: 1-12
+  tmdb_show:1429:s3:
+    1-12: 1-12
+  tvdb_show:267440:s3:
+    1-12: 1-12
+anidb:14444:s1:
+  anilist:104578:
+    13-22: 13-22
+  mal:38524:
+    13-22: 13-22
+  tmdb_show:1429:s3:
+    13-22: 13-22
+  tvdb_show:267440:s3:
+    13-22: 13-22
+anidb:14977:s1:
+  anilist:110277:
+    1-16: 1-16
+  mal:40028:
+    1-16: 1-16
+  tmdb_show:1429:s4:
+    1-16: 1-16
+  tvdb_show:267440:s4:
+    1-16: 1-16
+anidb:16177:s1:
+  anilist:131681:
+    17-28: 17-28
+  mal:48583:
+    17-28: 17-28
+  tmdb_show:1429:s4:
+    17-28: 17-28
+  tvdb_show:267440:s4:
+    17-28: 17-28
+anidb:17303:s0:
+  anilist:146984:
+    '29': '29'
+  mal:51535:
+    '29': '29'
+  tmdb_show:1429:s4:
+    '29': '29'
+  tvdb_show:267440:s4:
+    '29': '29'
+anidb:17303:s1:
+  anilist:162314:
+    '30': '30'
+  mal:51535:
+    '30': '30'
+  tmdb_show:1429:s4:
+    '30': '30'
+  tvdb_show:267440:s4:
+    '30': '30'
+anidb:14523:s1:
+  anilist:106479:
+    1-12: 1-12
+  mal:38790:
+    1-12: 1-12
+  tmdb_show:96402:s1:
+    1-12: 1-12
+  tvdb_show:373679:s1:
+    1-12: 1-12
+anidb:15464:s1:
+  anilist:116867:
+    1-12: 1-12
+  mal:41514:
+    1-12: 1-12
+  tmdb_show:96402:s2:
+    1-12: 1-12
+  tvdb_show:373679:s2:
+    1-12: 1-12
+anidb:23:s1:
+  anilist:1:
+    1-26: 1-26
+  mal:1:
+    1-26: 1-26
+  tmdb_show:30991:s1:
+    1-26: 1-26
+  tvdb_show:76885:s1:
+    1-26: 1-26
+anidb:18290:s1:
+  anilist:171018:
+    1-12: 1-12
+  mal:57334:
+    1-12: 1-12
+  tmdb_show:240411:s1:
+    1-12: 1-12
+  tvdb_show:432832:s1:
+    1-12: 1-12
+anidb:19060:s1:
+  anilist:185660:
+    1-12: 1-12
+  mal:60543:
+    1-12: 1-12
+  tmdb_show:240411:s2:
+    1-12: 1-12
+  tvdb_show:432832:s2:
+    1-12: 1-12
+anidb:4563:s1:
+  anilist:1535:
+    1-37: 1-37
+  mal:1535:
+    1-37: 1-37
+  tmdb_show:13916:s1:
+    1-37: 1-37
+  tvdb_show:79481:s1:
+    1-37: 1-37
+anidb:247:s1:
+  anilist:467:
+    1-26: 1-26
+  mal:467:
+    1-26: 1-26
+  tmdb_show:1095:s1:
+    1-26: 1-26
+  tvdb_show:73749:s1:
+    1-26: 1-26
+anidb:1176:s1:
+  anilist:801:
+    1-26: 1-26
+  mal:801:
+    1-26: 1-26
+  tmdb_show:1095:s2:
+    1-26: 1-26
+  tvdb_show:73749:s2:
+    1-26: 1-26

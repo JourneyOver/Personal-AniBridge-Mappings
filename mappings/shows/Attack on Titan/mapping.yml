@@ -1,73 +1,81 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/eliasbenb/PlexAniBridge-Mappings/v2/mappings.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
 
-"16498":
-  anidb_id: 9541
-  imdb_id: "tt2560140"
-  mal_id: 16498
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s1: ""
+anidb:9541:s1:
+  anilist:16498:
+    "1-25": "1-25"
+  mal:16498:
+    "1-25": "1-25"
+  tmdb_show:1429:s1:
+    "1-25": "1-25"
+  tvdb_show:267440:s1:
+    "1-25": "1-25"
 
-"20958":
-  anidb_id: 10944
-  imdb_id: "tt2560140"
-  mal_id: 25777
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s2: ""
+anidb:10944:s1:
+  anilist:20958:
+    "1-12": "1-12"
+  mal:25777:
+    "1-12": "1-12"
+  tmdb_show:1429:s2:
+    "1-12": "1-12"
+  tvdb_show:267440:s2:
+    "1-12": "1-12"
 
-"99147":
-  anidb_id: 13241
-  imdb_id: "tt2560140"
-  mal_id: 35760
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s3: "e1-e12"
+anidb:12189:s1:
+  anilist:99147:
+    "1-12": "1-12"
+  mal:35760:
+    "1-12": "1-12"
+  tmdb_show:1429:s3:
+    "1-12": "1-12"
+  tvdb_show:267440:s3:
+    "1-12": "1-12"
 
-"104578":
-  anidb_id: 14444
-  imdb_id: "tt2560140"
-  mal_id: 38524
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s3: "e13-e22"
+anidb:14444:s1:
+  anilist:104578:
+    "13-22": "13-22"
+  mal:38524:
+    "13-22": "13-22"
+  tmdb_show:1429:s3:
+    "13-22": "13-22"
+  tvdb_show:267440:s3:
+    "13-22": "13-22"
 
-"110277":
-  anidb_id: 14977
-  imdb_id: "tt2560140"
-  mal_id: 40028
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s4: "e1-e16"
+anidb:14977:s1:
+  anilist:110277:
+    "1-16": "1-16"
+  mal:40028:
+    "1-16": "1-16"
+  tmdb_show:1429:s4:
+    "1-16": "1-16"
+  tvdb_show:267440:s4:
+    "1-16": "1-16"
 
-"131681":
-  anidb_id: 16177
-  imdb_id: "tt2560140"
-  mal_id: 48583
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s4: "e17-e28"
+anidb:16177:s1:
+  anilist:131681:
+    "17-28": "17-28"
+  mal:48583:
+    "17-28": "17-28"
+  tmdb_show:1429:s4:
+    "17-28": "17-28"
+  tvdb_show:267440:s4:
+    "17-28": "17-28"
 
-"146984":
-  anidb_id: 17303
-  imdb_id: "tt2560140"
-  mal_id: 51535
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s4: "e29"
+anidb:17303:s0:
+  anilist:146984:
+    "29": "29"
+  mal:51535:
+    "29": "29"
+  tmdb_show:1429:s4:
+    "29": "29"
+  tvdb_show:267440:s4:
+    "29": "29"
 
-"162314":
-  anidb_id: 17303
-  imdb_id: "tt2560140"
-  mal_id: 51535
-  tmdb_show_id: 1429
-  tvdb_id: 267440
-  tvdb_mappings:
-    s4: "e30"
+anidb:17303:s1:
+  anilist:162314:
+    "30": "30"
+  mal:51535:
+    "30": "30"
+  tmdb_show:1429:s4:
+    "30": "30"
+  tvdb_show:267440:s4:
+    "30": "30"

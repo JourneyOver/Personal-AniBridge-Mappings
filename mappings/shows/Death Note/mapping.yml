@@ -1,10 +1,11 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/eliasbenb/PlexAniBridge-Mappings/v2/mappings.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
 
-"1535":
-  anidb_id: 4563
-  imdb_id: "tt0877057"
-  mal_id: 1535
-  tmdb_show_id: 13916
-  tvdb_id: 79481
-  tvdb_mappings:
-    s1: ""
+anidb:4563:s1:
+  anilist:1535:
+    "1-37": "1-37"
+  mal:1535:
+    "1-37": "1-37"
+  tmdb_show:13916:s1:
+    "1-37": "1-37"
+  tvdb_show:79481:s1:
+    "1-37": "1-37"
