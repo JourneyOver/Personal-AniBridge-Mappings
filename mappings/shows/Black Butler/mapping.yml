@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
 
-anidb:6048:s1:
+anidb:6048:R:
   anilist:4898:
     "1-24": "1-24"
   mal:4898:
@@ -10,7 +10,7 @@ anidb:6048:s1:
   tvdb_show:83996:s1:
     "1-24": "1-24"
 
-anidb:7369:s1:
+anidb:7369:R:
   anilist:6707:
     "1-12": "1-12"
   mal:6707:
@@ -20,7 +20,7 @@ anidb:7369:s1:
   tvdb_show:83996:s2:
     "1-12": "1-12"
 
-anidb:10402:s1:
+anidb:10402:R:
   anilist:20606:
     "1-10": "1-10"
   mal:22145:
@@ -30,7 +30,7 @@ anidb:10402:s1:
   tvdb_show:83996:s3:
     "1-10": "1-10"
 
-anidb:18100:s1:
+anidb:18100:R:
   anilist:166715:
     "1-11": "1-11"
   mal:55855:
@@ -40,7 +40,7 @@ anidb:18100:s1:
   tvdb_show:83996:s4:
     "1-11": "1-11"
 
-anidb:18739:s1:
+anidb:18739:R:
   anilist:179054:
     "1-13": "1-13"
   mal:59228:

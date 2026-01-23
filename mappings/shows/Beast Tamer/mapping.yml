@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
 
-anidb:17444:s1:
+anidb:17444:R:
   anilist:150695:
     "1-13": "1-13"
   mal:52046:
