@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to combine all individual mapping.yml files from shows/ into combined.yml
+Script to combine all individual mapping.yml files into combined mappings.yml
 """
 
 import yaml
