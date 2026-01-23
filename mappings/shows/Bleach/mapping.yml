@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
+
+anidb:2369:s1:
+  anilist:269:
+    "1-366": "1-366"
+  mal:269:
+    "1-366": "1-366"
+  tmdb_show:30984:s1:
+    "1-366": "1-366"
+  tvdb_show:74796:s1:
+    "1-20": "1-20"
+  tvdb_show:74796:s2:
+    "21-41": "1-21"
+  tvdb_show:74796:s3:
+    "42-63": "1-22"
+  tvdb_show:74796:s4:
+    "64-91": "1-28"
+  tvdb_show:74796:s5:
+    "92-109": "1-18"
+  tvdb_show:74796:s6:
+    "110-131": "1-22"
+  tvdb_show:74796:s7:
+    "132-151": "1-20"
+  tvdb_show:74796:s8:
+    "152-167": "1-16"
+  tvdb_show:74796:s9:
+    "168-189": "1-22"
+  tvdb_show:74796:s10:
+    "190-205": "1-16"
+  tvdb_show:74796:s11:
+    "206-212": "1-7"
+  tvdb_show:74796:s12:
+    "213-229": "1-17"
+  tvdb_show:74796:s13:
+    "230-265": "1-36"
+  tvdb_show:74796:s14:
+    "266-316": "1-51"
+  tvdb_show:74796:s15:
+    "317-342": "1-26"
+  tvdb_show:74796:s16:
+    "343-366": "1-24"
+
+anidb:15449:s1:
+  anilist:116674:
+    "1-13": "1-13"
+  mal:41467:
+    "1-13": "1-13"
+  tmdb_show:30984:s2:
+    "1-13": "1-13"
+  tvdb_show:74796:s17:
+    "1-13": "1-13"
+
+anidb:17765:s1:
+  anilist:159322:
+    "1-13": "1-13"
+  mal:53998:
+    "1-13": "1-13"
+  tmdb_show:30984:s2:
+    "1-13": "14-26"
+  tvdb_show:74796:s17:
+    "1-13": "14-26"
+
+anidb:18220:s1:
+  anilist:169755:
+    "1-14": "1-14"
+  mal:56784:
+    "1-14": "1-14"
+  tmdb_show:30984:s2:
+    "1-14": "27-40"
+  tvdb_show:74796:s17:
+    "1-14": "27-40"
