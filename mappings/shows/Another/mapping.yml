@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
 
+# Episode Ordering -- TVDB (Aired)
+
 anidb:8625:R:
   anilist:11701:
     "1": "1"
