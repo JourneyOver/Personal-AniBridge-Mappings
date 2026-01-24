@@ -1,5 +1,14 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
 
+anidb:19564:R:
+  anilist:198374:
+    1-13: 1-13
+  mal:62432:
+    1-13: 1-13
+  tmdb_show:303434:s1:
+    1-13: 1-13
+  tvdb_show:467839:s1:
+    1-13: 1-13
 anidb:11995:R:
   anilist:21700:
     1-12: 1-12
@@ -478,6 +487,15 @@ anidb:13259:R:
     1-24: 1-24
   tvdb_show:337017:s1:
     1-24: 1-24
+anidb:19209:R:
+  anilist:187901:
+    1-12: 1-12
+  mal:61196:
+    1-12: 1-12
+  tmdb_show:286291:s1:
+    1-12: 1-12
+  tvdb_show:461423:s1:
+    1-12: 1-12
 anidb:4563:R:
   anilist:1535:
     1-37: 1-37
@@ -820,6 +838,88 @@ anidb:16917:S:
     1-2: 4,8
   tvdb_show:411625:s0:
     1-2: 1-2
+anidb:14693:R:
+  anilist:107956:
+    1-12: 1-12
+  mal:39324:
+    1-12: 1-12
+  tmdb_show:88804:s1:
+    1-12: 1-12
+  tvdb_show:362839:s1:
+    1-12: 1-12
+anidb:144:R:
+  anilist:249:
+    1-167: 1-167
+  mal:249:
+    1-167: 1-167
+  tmdb_show:35610:s1:
+    1-167: 1-167
+  tvdb_show:71361:s1:
+    1-27: 1-27
+  tvdb_show:71361:s2:
+    28-54: 1-27
+  tvdb_show:71361:s3:
+    55-82: 1-28
+  tvdb_show:71361:s4:
+    83-110: 1-28
+  tvdb_show:71361:s5:
+    111-138: 1-28
+  tvdb_show:71361:s6:
+    139-167: 1-29
+anidb:6716:R:
+  anilist:6811:
+    1-26: 1-26
+  mal:6811:
+    1-26: 1-26
+  tmdb_show:35610:s2:
+    1-26: 1-26
+  tvdb_show:71361:s7:
+    1-26: 1-26
+anidb:7674:R:
+  anilist:8841:
+    1-12: 1-12
+  mal:8841:
+    1-12: 1-12
+  tmdb_show:38420:s1:
+    1-12: 1-12
+  tvdb_show:220571:s1:
+    1-12: 1-12
+anidb:8448:R:
+  anilist:10209:
+    '1': '1'
+  mal:10209:
+    '1': '1'
+  tmdb_show:38420:s0:
+    '1': '1'
+  tvdb_show:220571:s0:
+    '1': '1'
+anidb:9241:R:
+  anilist:10209:
+    '1': '2'
+  mal:10209:
+    '1': '2'
+  tmdb_show:38420:s0:
+    '1': '2'
+  tvdb_show:220571:s0:
+    '1': '2'
+anidb:8476:R:
+  anilist:10790:
+    1-10: 1-10
+  mal:10790:
+    1-10: 1-10
+  tmdb_show:38420:s2:
+    1-10: 1-10
+  tvdb_show:220571:s2:
+    1-10: 1-10
+anidb:9129:R:
+  anilist:15437:
+    '1': '1'
+  mal:15437:
+    '1': '1'
+  tmdb_show:38420:s0:
+    '1': '3'
+  tvdb_show:220571:s0:
+    '1': '3'
 anidb:17870:R:
   anilist:161645:
     1-24: 1-24
@@ -927,4 +1027,13 @@ anidb:15557:R:
   tmdb_show:103157:s1:
     1-12: 1-12
   tvdb_show:388006:s1:
+    1-12: 1-12
+anidb:17341:R:
+  anilist:148116:
+    1-12: 1-12
+  mal:51711:
+    1-12: 1-12
+  tmdb_show:200777:s1:
+    1-12: 1-12
+  tvdb_show:419502:s1:
     1-12: 1-12
