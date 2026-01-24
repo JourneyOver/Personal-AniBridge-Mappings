@@ -24,8 +24,8 @@ This collection includes mappings for various anime series, organized by show na
 ## Repository Structure
 
 - `mappings/`: Contains the combined mappings file.
-- `shows/`: Individual mapping files for each anime series.
-- `movies/`: Individual mapping files for each anime movie.
+- `mappings/shows/`: Individual mapping files for each anime series.
+- `mappings/movies/`: Individual mapping files for each anime movie.
 - `combine_mappings.py`: Script to combine individual mappings into one file.
 
 ## Credits
