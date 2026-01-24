@@ -4,7 +4,7 @@ A personal collection of custom mappings for [PlexAniBridge](https://github.com/
 
 ## Disclaimer
 
-**This repository is for personal use only.** The mappings provided here are tailored to my specific Plex setup and may not work for other users due to differences in media naming, file structures, or personal preferences. Use at your own risk and verify mappings before applying them.
+**This repository is for personal use only.** The mappings provided here are tailored to my specific Plex setup and may not work for other users. Use at your own risk and verify mappings before applying them.
 
 ## Description
 
