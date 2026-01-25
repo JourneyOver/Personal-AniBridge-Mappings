@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
+
+anidb:15107:R:
+  anilist:111965:
+    "1-12": "1-12"
+  mal:40436:
+    "1-12": "1-12"
+  tmdb_show:99080:s1:
+    "1-12": "1-12"
+  tvdb_show:379923:s1:
+    "1-12": "1-12"
+
+anidb:16973:R:
+  anilist:141400:
+    "1-12": "1-12"
+  mal:50348:
+    "1-12": "1-12"
+  tmdb_show:99080:s2:
+    "1-12": "1-12"
+  tvdb_show:379923:s2:
+    "1-12": "1-12"

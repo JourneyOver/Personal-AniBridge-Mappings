@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
+
+# Episode Ordering -- TVDB (Aired)
+
+anidb:17495:R:
+  anilist:151807:
+    "1-12": "1-12"
+  mal:52299:
+    "1-12": "1-12"
+  tmdb_show:127532:s1:
+    "1-12": "1-12"
+  tvdb_show:389597:s1:
+    "1-12": "1-12"
+
+anidb:18576:R:
+  anilist:176496:
+    "1-13": "1-13"
+  mal:58567:
+    "1-13": "1-13"
+  tmdb_show:127532:s1:
+    "1-13": "13-25"
+  tvdb_show:389597:s2:
+    "1-13": "1-13"
