@@ -2009,3 +2009,219 @@ anidb:15028:R:
     1-12: 1-12
   tvdb_show:351953:s2:
     1-12: 1-12
+anidb:4568:R:
+  anilist:1689:
+    1-3: 1-3
+  mal:1689:
+    1-3: 1-3
+  tmdb_movie:38142:
+    1-3: 1|-3
+anidb:15924:R:
+  anilist:127271:
+    '1': '1'
+  mal:44807:
+    '1': '1'
+  tmdb_movie:776305:
+    '1': '1'
+anidb:16176:R:
+  anilist:131680:
+    '1': '1'
+  mal:48585:
+    '1': '1'
+  tmdb_movie:812225:
+    '1': '1'
+anidb:6041:R:
+  anilist:4835:
+    '1': '1'
+  mal:4835:
+    '1': '1'
+  tmdb_movie:17165:
+    '1': '1'
+anidb:7666:R:
+  anilist:8247:
+    '1': '1'
+  mal:8247:
+    '1': '1'
+  tmdb_movie:73245:
+    '1': '1'
+anidb:4515:R:
+  anilist:1686:
+    '1': '1'
+  mal:1686:
+    '1': '1'
+  tmdb_movie:15575:
+    '1': '1'
+anidb:5352:R:
+  anilist:834:
+    '1': '1'
+  mal:2889:
+    '1': '1'
+  tmdb_movie:17101:
+    '1': '1'
+anidb:331:R:
+  anilist:513:
+    '1': '1'
+  mal:513:
+    '1': '1'
+  tmdb_movie:10515:
+    '1': '1'
+anidb:18324:R:
+  anilist:171627:
+    '1': '1'
+  mal:57555:
+    '1': '1'
+  tmdb_movie:1218925:
+    '1': '1'
+anidb:8073:R:
+  anilist:9760:
+    '1': '1'
+  mal:9760:
+    '1': '1'
+  tmdb_movie:79707:
+    '1': '1'
+anidb:219:R:
+  anilist:5:
+    '1': '1'
+  mal:5:
+    '1': '1'
+  tmdb_movie:11299:
+    '1': '1'
+anidb:15587:R:
+  anilist:119321:
+    '1': '1'
+  mal:42143:
+    '1': '1'
+  tmdb_movie:683127:
+    '1': '1'
+anidb:8141:R:
+  anilist:10029:
+    '1': '1'
+  mal:10029:
+    '1': '1'
+  tmdb_movie:83389:
+    '1': '1'
+anidb:61:R:
+  anilist:43:
+    '1': '1'
+  mal:43:
+    '1': '1'
+  tmdb_movie:9323:
+    '1': '1'
+anidb:332:R:
+  anilist:578:
+    '1': '1'
+  mal:578:
+    '1': '1'
+  tmdb_movie:12477:
+    '1': '1'
+anidb:8931:R:
+  anilist:12783:
+    '1': '1'
+  mal:12783:
+    '1': '1'
+  tmdb_movie:246464:
+    '1': '1'
+anidb:8271:R:
+  anilist:9790:
+    '1': '1'
+  mal:9790:
+    '1': '1'
+  tmdb_movie:95170:
+    '1': '1'
+anidb:1218:R:
+  anilist:431:
+    '1': '1'
+  mal:431:
+    '1': '1'
+  tmdb_movie:4935:
+    '1': '1'
+anidb:286:R:
+  anilist:512:
+    '1': '1'
+  mal:512:
+    '1': '1'
+  tmdb_movie:16859:
+    '1': '1'
+anidb:13310:R:
+  anilist:102976:
+    '1': '1'
+  mal:38040:
+    '1': '1'
+  tmdb_movie:532067:
+    '1': '1'
+anidb:9919:R:
+  anilist:19021:
+    '1': '1'
+  mal:19021:
+    '1': '1'
+  tmdb_movie:214553:
+    '1': '1'
+anidb:13176:R:
+  anilist:98762:
+    '1': '1'
+  mal:35608:
+    '1': '1'
+  tmdb_movie:460399:
+    '1': '1'
+anidb:13612:R:
+  anilist:100643:
+    '1': '1'
+  mal:36862:
+    '1': '1'
+  tmdb_movie:573730:
+    '1': '1'
+anidb:13941:R:
+  anilist:101343:
+    '1': '1'
+  anilist:101344:
+    '2': '1'
+  mal:37514:
+    '1': '1'
+  mal:37515:
+    '2': '1'
+  tmdb_movie:526426:
+    '1': '1'
+  tmdb_movie:526429:
+    '2': '1'
+anidb:10967:R:
+  anilist:20981:
+    '1': '1'
+  mal:28805:
+    '1': '1'
+  tmdb_movie:315465:
+    '1': '1'
+anidb:13545:R:
+  anilist:109979:
+    '1': '1'
+  mal:36699:
+    '1': '1'
+  tmdb_movie:508883:
+    '1': '1'
+anidb:320:R:
+  anilist:1430:
+    '1': '1'
+  mal:1430:
+    '1': '1'
+  tmdb_movie:15371:
+    '1': '1'
+anidb:679:R:
+  anilist:597:
+    '1': '1'
+  mal:597:
+    '1': '1'
+  tmdb_movie:15370:
+    '1': '1'
+anidb:9589:R:
+  anilist:16782:
+    '1': '1'
+  mal:16782:
+    '1': '1'
+  tmdb_movie:198375:
+    '1': '1'
+anidb:4151:R:
+  anilist:2236:
+    '1': '1'
+  mal:2236:
+    '1': '1'
+  tmdb_movie:14069:
+    '1': '1'

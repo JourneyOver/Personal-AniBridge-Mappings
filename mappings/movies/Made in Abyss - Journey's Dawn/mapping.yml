@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
+
+# Include mapping for Made in Abyss - Journey's Dawn and Made in Abyss - Wandering Twilight
+
+anidb:13941:R:
+  anilist:101343:
+    "1": "1"
+  anilist:101344:
+    "2": "1"
+  mal:37514:
+    "1": "1"
+  mal:37515:
+    "2": "1"
+  tmdb_movie:526426:
+    "1": "1"
+  tmdb_movie:526429:
+    "2": "1"

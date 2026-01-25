@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/anibridge/anibridge-mappings/refs/heads/main/mappings.schema.json
+
+anidb:8073:R:
+  anilist:9760:
+    "1": "1"
+  mal:9760:
+    "1": "1"
+  tmdb_movie:79707:
+    "1": "1"
