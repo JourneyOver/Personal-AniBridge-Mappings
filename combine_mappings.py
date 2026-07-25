@@ -29,7 +29,7 @@ def combine_mappings() -> None:
                 for key in data:
                     if key in seen_in:
                         print(f"Warning: duplicate key '{key}' in {yml_file} (first seen in {seen_in[key]})")
-                    seen_in[key] = yml_file
+                    seen_in.setdefault(key, yml_file)
                 combined.update(data)
             except Exception as e:
                 print(f"Error processing {yml_file}: {e}", file=sys.stderr)
