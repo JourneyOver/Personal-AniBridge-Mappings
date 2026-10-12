@@ -72,7 +72,23 @@ SUPPORTED_MATCH_PROVIDERS: frozenset[str] = frozenset(
     {"tvdb", "tmdb", "imdb", "anidb", "mal", "anilist", "simkl", "kitsu"}
 )
 
+# Target namespaces that are only relevant to CrossWatch overrides and must
+# not appear in the combined AniBridge YAML/JSON output.
+CROSSWATCH_ONLY_TARGET_NAMESPACES: frozenset[str] = frozenset({"kitsu"})
+
 # === Helpers ===============================================================
+
+
+class _NoAliasDumper(yaml.SafeDumper):
+    """PyYAML dumper that never emits anchors (``&id001``) or aliases.
+
+    Swap-source entries reuse the originals' episode-map dicts, so the
+    default dumper would emit ``&id001`` / ``*id001`` references — those
+    are valid YAML but make diffs and hand-edits harder.
+    """
+
+    def ignore_aliases(self, data: Any) -> bool:  # noqa: D401 - PyYAML API
+        return True
 
 
 def is_internal_key(key: Any) -> bool:
@@ -132,8 +148,65 @@ def parse_source_key(source_key: Any, *, origin: Path | None = None) -> dict | N
     return parts
 
 
+def format_source_key(parts: dict[str, Any]) -> str:
+    """Render a parsed source ``{provider, kind, id, season}`` back to a key.
+
+    Inverse of :func:`parse_source_key`: ``tvdb_show:475617:s1`` ↔
+    ``{"provider": "tvdb", "kind": "show", "id": "475617", "season": 1}``.
+    """
+    key = f"{parts['provider']}_{parts['kind']}:{parts['id']}"
+    if parts.get("season") is not None:
+        key += f":s{parts['season']}"
+    return key
+
+
+def classify_target(target_key: Any) -> str:
+    """Classify an AniBridge target key.
+
+    Returns one of:
+
+    * ``"crosswatch"`` — valid CrossWatch override target namespace
+      (``anidb``, ``anilist``, ``mal``, ``simkl``, ``kitsu``).
+    * ``"swap"`` — valid AniBridge source reference (``provider_kind:id``
+      with optional ``:sN``) that should be promoted to its own source
+      entry in the combined output and skipped for CrossWatch overrides.
+    * ``"unsupported"`` — malformed or otherwise unrecognised.
+    """
+    if not isinstance(target_key, str):
+        return "unsupported"
+    if TARGET_RE.fullmatch(target_key):
+        return "crosswatch"
+    if SOURCE_RE.fullmatch(target_key):
+        return "swap"
+    return "unsupported"
+
+
+def parse_swap_source(target_key: Any) -> dict | None:
+    """Parse an AniBridge source-formatted target into its components.
+
+    Returns ``{provider, kind, id, season}`` (with ``season`` as ``int | None``)
+    for keys that match :data:`SOURCE_RE`, otherwise ``None``.
+    """
+    if not isinstance(target_key, str):
+        return None
+    match = SOURCE_RE.fullmatch(target_key)
+    if not match:
+        return None
+    parts = match.groupdict()
+    parts["season"] = (
+        int(parts["season"]) if parts["season"] is not None else None
+    )
+    return parts
+
+
 def parse_target_key(target_key: Any, *, origin: Path | None = None) -> dict | None:
-    """Parse an AniBridge target key into a CrossWatch ``{namespace, id}``."""
+    """Parse an AniBridge target key into a CrossWatch ``{namespace, id}``.
+
+    Swap-source targets (e.g. ``tvdb_show:475617:s1``) return ``None``
+    silently because they are valid AniBridge references rather than
+    CrossWatch target namespaces. Truly malformed targets still emit a
+    warning so the user is alerted to a typo.
+    """
     if not isinstance(target_key, str):
         print(
             f"Warning: target key is not a string: {target_key!r}",
@@ -141,15 +214,19 @@ def parse_target_key(target_key: Any, *, origin: Path | None = None) -> dict | N
         )
         return None
     match = TARGET_RE.fullmatch(target_key)
-    if not match:
-        suffix = f" in {origin}" if origin is not None else ""
-        print(
-            f"Warning: unsupported CrossWatch target namespace in "
-            f"{target_key!r}{suffix}; skipping target",
-            file=sys.stderr,
-        )
+    if match:
+        return match.groupdict()
+    # Treat valid AniBridge source references as silent swap targets; only
+    # warn when the key is genuinely malformed.
+    if SOURCE_RE.fullmatch(target_key):
         return None
-    return match.groupdict()
+    suffix = f" in {origin}" if origin is not None else ""
+    print(
+        f"Warning: unsupported CrossWatch target namespace in "
+        f"{target_key!r}{suffix}; skipping target",
+        file=sys.stderr,
+    )
+    return None
 
 
 def stable_override_id(identity: dict[str, Any]) -> str:
@@ -272,6 +349,85 @@ def combine_mappings() -> tuple[dict[str, Any], dict[str, str], bool]:
     return combined, titles, had_error
 
 
+def expand_swap_sources(
+    combined: dict[str, Any],
+    titles: dict[str, str],
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Expand ``combined`` by generating source entries for swap targets.
+
+    For every source ``S`` in ``combined``, any target that parses as a
+    valid AniBridge source but is *not* a CrossWatch target namespace
+    (i.e. a swap target like ``tvdb_show:475617:s1``) becomes its own
+    source entry. The generated entry mirrors ``S`` with the swap target
+    swapped out and the original ``S`` appended as a target.
+
+    Example: given ``tmdb_show:320377:s1`` whose targets include
+    ``tvdb_show:475617:s1: 1-12: 1-12``, this function adds a
+    ``tvdb_show:475617:s1`` source entry containing the same real
+    targets (anidb/anilist/mal/kitsu with their original ranges) plus a
+    ``tmdb_show:320377:s1: 1-12: 1-12`` back-reference.
+
+    Existing entries (user-defined or generated earlier in this run) win
+    over newly-generated swaps; the same first-occurrence-wins rule used
+    by :func:`combine_mappings` applies.
+    """
+    expanded: dict[str, Any] = dict(combined)
+    expanded_titles: dict[str, str] = dict(titles)
+    generated = 0
+
+    for source_key, targets in combined.items():
+        if not isinstance(targets, dict):
+            continue
+        title = titles.get(source_key, "")
+
+        # Collect swap targets in this source, in source order.
+        swap_targets: list[tuple[str, Any]] = []
+        for target_key, episode_map in targets.items():
+            if classify_target(target_key) != "swap":
+                continue
+            swap_key = format_source_key(parse_swap_source(target_key))
+            if swap_key == source_key:
+                print(
+                    f"Warning: source {source_key!r} references itself "
+                    f"as a swap target; skipping swap",
+                    file=sys.stderr,
+                )
+                continue
+            swap_targets.append((swap_key, episode_map))
+
+        if not swap_targets:
+            continue
+
+        # Build the base target dict (CrossWatch targets from the original
+        # source, in their original order). Swap targets from the original
+        # source are excluded — the generated entry shouldn't carry them
+        # because CrossWatch would not emit them as override targets.
+        base_targets: dict[str, Any] = {
+            other_key: other_map
+            for other_key, other_map in targets.items()
+            if classify_target(other_key) == "crosswatch"
+        }
+
+        for swap_key, episode_map in swap_targets:
+            if swap_key in expanded:
+                # Existing entry (user-defined or generated earlier) wins.
+                continue
+            entry = dict(base_targets)
+            entry[source_key] = episode_map
+            expanded[swap_key] = entry
+            expanded_titles[swap_key] = title
+            generated += 1
+            print(
+                f"Generated swap source entry: {swap_key} (from {source_key})",
+                file=sys.stderr,
+            )
+
+    if generated:
+        print(f"Generated {generated} swap source entr{'y' if generated == 1 else 'ies'}")
+
+    return expanded, expanded_titles
+
+
 # === Override generation ===================================================
 
 
@@ -288,9 +444,15 @@ def _make_override(
     target_id: str,
     title: str,
     timestamp: int,
+    created_at: int | None = None,
     note: str = "",
 ) -> Override:
-    """Build a CrossWatch override dict with a deterministic ID."""
+    """Build a CrossWatch override dict with a deterministic ID.
+
+    ``created_at`` defaults to ``timestamp`` (current run time). Pass an
+    explicit value to preserve a previously-recorded ``created_at`` when
+    re-running the script against an existing overrides file.
+    """
     identity: dict[str, Any] = {
         "media_type": media_type,
         "match_provider": match_provider,
@@ -304,7 +466,7 @@ def _make_override(
     }
     return Override(
         id=stable_override_id(identity),
-        created_at=timestamp,
+        created_at=created_at if created_at is not None else timestamp,
         updated_at=timestamp,
         enabled=True,
         media_type=media_type,
@@ -559,8 +721,19 @@ def build_crosswatch_overrides(
     titles: dict[str, str],
     *,
     timestamp: int,
+    existing_created_at: dict[str, int] | None = None,
 ) -> dict[str, Any]:
-    """Build the ``crosswatch-overrides.json`` payload."""
+    """Build the ``crosswatch-overrides.json`` payload.
+
+    ``existing_created_at`` is an ``{override_id: created_at}`` map read
+    from a prior run's ``crosswatch-overrides.json``. When present, the
+    corresponding overrides preserve their original ``created_at`` so
+    re-running the script only refreshes ``updated_at``. New overrides
+    (and overrides whose deterministic ID no longer matches anything in
+    the previous run) are stamped with ``timestamp``.
+    """
+    if existing_created_at is None:
+        existing_created_at = {}
     overrides_by_id: dict[str, Override] = {}
 
     for source_key, targets in combined.items():
@@ -572,6 +745,10 @@ def build_crosswatch_overrides(
             origin=COMBINED_OUTPUT,
             timestamp=timestamp,
         ):
+            preserved = existing_created_at.get(override["id"])
+            if preserved is not None:
+                override["created_at"] = preserved
+            # updated_at was already set to `timestamp` by _make_override.
             overrides_by_id[override["id"]] = override
 
     # Preserve insertion order so the output is stable and diff-friendly.
@@ -581,7 +758,69 @@ def build_crosswatch_overrides(
     }
 
 
+def read_existing_created_at(path: Path) -> dict[str, int]:
+    """Load ``{override_id: created_at}`` from an existing overrides file.
+
+    Returns an empty dict if the file is missing or malformed; in either
+    case the next write becomes the authoritative ``created_at`` for
+    every rule. The read is intentionally permissive: a corrupt or
+    hand-edited overrides file should not block regeneration.
+    """
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        print(
+            f"Warning: could not read existing overrides from {path}: "
+            f"{exc}; treating as empty",
+            file=sys.stderr,
+        )
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    overrides = data.get("overrides", [])
+    if not isinstance(overrides, list):
+        return {}
+    result: dict[str, int] = {}
+    for entry in overrides:
+        if not isinstance(entry, dict):
+            continue
+        override_id = entry.get("id")
+        created = entry.get("created_at")
+        if isinstance(override_id, str) and isinstance(created, int):
+            result[override_id] = created
+    return result
+
+
 # === Output writers ========================================================
+
+
+def _strip_crosswatch_only_targets(
+    combined: dict[str, Any],
+) -> dict[str, Any]:
+    """Return a copy of ``combined`` with CrossWatch-only target keys removed.
+
+    Targets whose namespace is in :data:`CROSSWATCH_ONLY_TARGET_NAMESPACES`
+    (currently just ``kitsu``) are kept in the in-memory ``combined`` dict so
+    the CrossWatch override generator can still see them, but are stripped
+    from the AniBridge-combined YAML/JSON output.
+    """
+    filtered: dict[str, Any] = {}
+    for source_key, targets in combined.items():
+        if not isinstance(targets, dict):
+            filtered[source_key] = targets
+            continue
+        filtered[source_key] = {
+            target_key: episode_map
+            for target_key, episode_map in targets.items()
+            if not (
+                isinstance(target_key, str)
+                and target_key.split(":", 1)[0]
+                in CROSSWATCH_ONLY_TARGET_NAMESPACES
+            )
+        }
+    return filtered
 
 
 def write_combined_yaml(combined: dict[str, Any]) -> None:
@@ -589,15 +828,20 @@ def write_combined_yaml(combined: dict[str, Any]) -> None:
 
     The output starts with a ``yaml-language-server`` schema comment and a
     ``$meta`` block describing this collection, followed by the merged
-    ``source_key -> targets`` mapping.
+    ``source_key -> targets`` mapping. Targets whose namespace is in
+    :data:`CROSSWATCH_ONLY_TARGET_NAMESPACES` are omitted.
     """
     MAPPINGS_DIR.mkdir(parents=True, exist_ok=True)
 
-    payload: dict[str, Any] = {"$meta": COMBINED_META, **combined}
+    payload: dict[str, Any] = {
+        "$meta": COMBINED_META,
+        **_strip_crosswatch_only_targets(combined),
+    }
 
     header = f"# yaml-language-server: $schema={SCHEMA_URL}\n\n"
     body = yaml.dump(
         payload,
+        Dumper=_NoAliasDumper,
         default_flow_style=False,
         allow_unicode=True,
         sort_keys=False,
@@ -611,14 +855,15 @@ def write_combined_min_json(combined: dict[str, Any]) -> None:
 
     Mirrors the structure of :func:`write_combined_yaml` (including the
     ``$meta`` block) plus the ``$schema`` declaration, but emits compact
-    JSON without indentation.
+    JSON without indentation. Targets whose namespace is in
+    :data:`CROSSWATCH_ONLY_TARGET_NAMESPACES` are omitted.
     """
     MAPPINGS_DIR.mkdir(parents=True, exist_ok=True)
 
     payload: dict[str, Any] = {
         "$schema": SCHEMA_URL,
         "$meta": COMBINED_META,
-        **combined,
+        **_strip_crosswatch_only_targets(combined),
     }
     COMBINED_MIN_JSON_OUTPUT.write_text(
         json.dumps(
@@ -654,13 +899,17 @@ def main() -> int:
     timestamp = int(time.time())
 
     combined, titles, had_error = combine_mappings()
-    write_combined_yaml(combined)
-    write_combined_min_json(combined)
+    expanded, expanded_titles = expand_swap_sources(combined, titles)
 
+    write_combined_yaml(expanded)
+    write_combined_min_json(expanded)
+
+    existing_created_at = read_existing_created_at(CROSSWATCH_OUTPUT)
     payload = build_crosswatch_overrides(
-        combined,
-        titles,
+        expanded,
+        expanded_titles,
         timestamp=timestamp,
+        existing_created_at=existing_created_at,
     )
     write_crosswatch_overrides(payload)
 
