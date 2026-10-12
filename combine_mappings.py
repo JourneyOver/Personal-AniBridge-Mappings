@@ -3,10 +3,12 @@
 
 This script walks every ``mappings/<shows|movies>/<Title>/mapping.yml`` file,
 merges them into a single ``mappings/mappings.yml`` (the AniBridge combined
-format), and emits ``mappings/crosswatch-overrides.json`` (the CrossWatch
-override format).
+format), a minified JSON mirror ``mappings/mappings.min.json``, and emits
+``mappings/crosswatch-overrides.json`` (the CrossWatch override format).
 
-The human-readable title for each media item is taken from the parent folder
+The combined YAML/JSON includes a ``$meta`` block at the top describing this
+collection (schema version and human-readable description). The
+human-readable title for each media item is taken from the parent folder
 name — e.g. ``mappings/shows/Overgeared/mapping.yml`` yields override rules
 with ``"title": "Overgeared"``.
 """
@@ -34,7 +36,14 @@ MAPPINGS_DIR = Path("mappings")
 MAPPING_TYPES: tuple[str, ...] = ("shows", "movies")
 
 COMBINED_OUTPUT = MAPPINGS_DIR / "mappings.yml"
+COMBINED_MIN_JSON_OUTPUT = MAPPINGS_DIR / "mappings.min.json"
 CROSSWATCH_OUTPUT = MAPPINGS_DIR / "crosswatch-overrides.json"
+
+# Metadata prepended to the combined YAML/JSON as a ``$meta`` block.
+COMBINED_META: dict[str, str] = {
+    "schema_version": "3.0.0",
+    "description": "Journey Custom AniBridge Mapping",
+}
 
 # === AniBridge key syntax ===================================================
 
@@ -576,18 +585,52 @@ def build_crosswatch_overrides(
 
 
 def write_combined_yaml(combined: dict[str, Any]) -> None:
-    """Write the merged AniBridge mapping YAML."""
+    """Write the merged AniBridge mapping YAML.
+
+    The output starts with a ``yaml-language-server`` schema comment and a
+    ``$meta`` block describing this collection, followed by the merged
+    ``source_key -> targets`` mapping.
+    """
     MAPPINGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    payload: dict[str, Any] = {"$meta": COMBINED_META, **combined}
 
     header = f"# yaml-language-server: $schema={SCHEMA_URL}\n\n"
     body = yaml.dump(
-        combined,
+        payload,
         default_flow_style=False,
         allow_unicode=True,
         sort_keys=False,
     )
     COMBINED_OUTPUT.write_text(header + body, encoding="utf-8")
     print(f"Combined mappings written to {COMBINED_OUTPUT}")
+
+
+def write_combined_min_json(combined: dict[str, Any]) -> None:
+    """Write a minified JSON mirror of the combined AniBridge mapping.
+
+    Mirrors the structure of :func:`write_combined_yaml` (including the
+    ``$meta`` block) plus the ``$schema`` declaration, but emits compact
+    JSON without indentation.
+    """
+    MAPPINGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    payload: dict[str, Any] = {
+        "$schema": SCHEMA_URL,
+        "$meta": COMBINED_META,
+        **combined,
+    }
+    COMBINED_MIN_JSON_OUTPUT.write_text(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    print(f"Combined minified JSON written to {COMBINED_MIN_JSON_OUTPUT}")
 
 
 def write_crosswatch_overrides(payload: dict[str, Any]) -> None:
@@ -612,6 +655,7 @@ def main() -> int:
 
     combined, titles, had_error = combine_mappings()
     write_combined_yaml(combined)
+    write_combined_min_json(combined)
 
     payload = build_crosswatch_overrides(
         combined,

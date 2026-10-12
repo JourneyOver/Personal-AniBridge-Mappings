@@ -15,15 +15,17 @@ This collection includes mappings for various anime series, organized by show na
 ## Usage
 
 1. Clone this repository.
-2. Run the `combine_mappings.py` script to generate the combined `mappings.yml` file:
+2. Run the `combine_mappings.py` script to generate the combined mapping files:
    ```
    python combine_mappings.py
    ```
-3. Use the generated `mappings/mappings.yml` in your PlexAniBridge configuration.
+3. Use the generated `mappings/mappings.yml` (or its minified JSON mirror
+   `mappings/mappings.min.json`) in your PlexAniBridge configuration.
 
 ## Repository Structure
 
-- `mappings/`: Contains the combined mappings file.
+- `mappings/`: Contains the combined mappings files (`mappings.yml`,
+  `mappings.min.json`, and `crosswatch-overrides.json`).
 - `mappings/shows/`: Individual mapping files for each anime series.
 - `mappings/movies/`: Individual mapping files for each anime movie.
 - `combine_mappings.py`: Script to combine individual mappings into one file.
