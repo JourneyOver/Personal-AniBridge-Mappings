@@ -35,24 +35,36 @@ mapping files use (`tmdb_show`, `tvdb_show`, `anidb`, `anilist`, `mal`,
 python scripts/lookup_ids.py "Overgeared"
 ```
 
-It queries AniList (canonical anchor), Kitsu (which exposes AniDB and TVDB
-ids via its `/anime/{id}/mappings` bridge in one call), and TMDB (which
-provides the TV series id and, via `/tv/{id}/external_ids`, a TVDB
-fallback). TMDB requires a v3 API key, resolved in this order:
-`--tmdb-key` flag → `[tmdb] api_key` in the `config.ini` next to
-`lookup_ids.py` (copy from `config.ini.example`; override with
-`--config <path>`) → `TMDB_API_KEY` env var. The script prints a
-pasteable YAML block; you fill in the episode ranges and drop it into a
-per-show `mapping.yml`.
+It queries AniList (default anchor — AniList id, MAL id, and display title),
+animap.id (curated cross-IDs keyed by MAL id — AniDB, TVDB, and TMDB from
+one record, no auth), Kitsu (which exposes AniDB and TVDB ids via its
+`/anime/{id}/mappings` bridge in one call), and TMDB (which provides the TV
+series id and, via `/tv/{id}/external_ids`, a TVDB fallback). The TMDB key
+is optional and is resolved in this order: `--tmdb-key` flag → `[tmdb]
+api_key` in the `config.ini` next to `lookup_ids.py` (copy from
+`config.ini.example`; override with `--config <path>`) → `TMDB_API_KEY` env
+var. With no key, animap alone usually still resolves `tmdb_show` and
+`tvdb_show`. Pass `--no-animap` to disable the animap source. The script
+prints a pasteable YAML block; you fill in the episode ranges and drop it
+into a per-show `mapping.yml`.
 
-The AniDB id is resolved through a two-provider fallback chain
-(AniList → Kitsu) and the TVDB id through a two-provider chain
-(Kitsu → TMDB). If AniList doesn't return a MAL id (it usually does,
-via `idMal`) there is currently no fallback — the previous Jikan-based
-fallback was removed because the v4 API is unreliable from many
+The AniDB id is resolved through a three-provider fallback chain
+(animap → AniList → Kitsu), the TVDB id through a three-provider chain
+(animap → Kitsu → TMDB), and the TMDB id prefers animap's `type: "tv"`
+entry before falling back to TMDB `/search/tv`. animap is the preferred
+source for the bridge slots (`anidb`, `tvdb`, `tmdb`) and is normally only a
+fallback for `anilist`, `mal`, and `kitsu`. The exception: AniList's fuzzy
+search can return the wrong show (e.g. a mini-anime), so when animap finds an
+**exact title match** whose MAL id disagrees with AniList's, animap is
+treated as authoritative for the whole record and overrides `anilist`,
+`mal`, `kitsu`, and the display title too — keeping the emitted ids and the
+`# Title:`/`title:` lines consistent with each other. A warning naming both
+sides is printed when that happens. If AniList doesn't return a
+MAL id (it usually does, via `idMal`) animap is the fallback; the previous
+Jikan-based fallback was removed because the v4 API is unreliable from many
 networks. `tmdb_show` and `tvdb_show` are emitted with the `:s1` season
-suffix, `anidb` with the `:R` AniDB resource suffix, so the lines match
-the existing `mapping.yml` format and paste directly.
+suffix, `anidb` with the `:R` AniDB resource suffix, so the lines match the
+existing `mapping.yml` format and paste directly.
 
 ## Repository Structure
 
