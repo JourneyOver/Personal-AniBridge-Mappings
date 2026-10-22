@@ -3,6 +3,15 @@
 $meta:
   schema_version: 3.0.0
   description: Journey Custom AniBridge Mapping
+tmdb_show:303272:s1:
+  anidb:18729:R:
+    1-: 1-
+  anilist:178868:
+    1-: 1-
+  mal:59204:
+    1-: 1-
+  tvdb_show:452013:s1:
+    1-: 1-
 tmdb_show:324502:s1:
   anidb:20077:R:
     1-12: 1-12
@@ -48,6 +57,15 @@ tmdb_show:313346:s1:
     1-12: 1-12
   tvdb_show:473642:s1:
     1-12: 1-12
+tvdb_show:452013:s1:
+  anidb:18729:R:
+    1-: 1-
+  anilist:178868:
+    1-: 1-
+  mal:59204:
+    1-: 1-
+  tmdb_show:303272:s1:
+    1-: 1-
 tvdb_show:478752:s1:
   anidb:20077:R:
     1-12: 1-12

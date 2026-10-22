@@ -1,6 +1,6 @@
-# PlexAniBridge-Mappings
+# AniBridge-Mappings
 
-A personal collection of custom mappings for [PlexAniBridge](https://github.com/eliasbenb/PlexAniBridge), a tool that bridges Plex media libraries with AniList.
+A personal collection of custom mappings for [AniBridge](https://github.com/anibridge/anibridge), a tool that bridges Plex media libraries with AniList.
 
 ## Disclaimer
 
@@ -8,7 +8,7 @@ A personal collection of custom mappings for [PlexAniBridge](https://github.com/
 
 ## Description
 
-PlexAniBridge allows you to sync your Plex watch status with AniList. Custom mappings are used to match Plex media entries to their corresponding AniList IDs when automatic matching fails.
+AniBridge allows you to sync your Plex watch status with AniList. Custom mappings are used to match Plex media entries to their corresponding AniList IDs when automatic matching fails.
 
 This collection includes mappings for various anime series, organized by show name.
 
@@ -20,7 +20,7 @@ This collection includes mappings for various anime series, organized by show na
    python scripts/combine_mappings.py
    ```
 3. Use the generated `mappings/mappings.yml` (or its minified JSON mirror
-   `mappings/mappings.min.json`) in your PlexAniBridge configuration.
+   `mappings/mappings.min.json`) in your AniBridge configuration.
 
    Both scripts are designed to be run from the repo root (their relative
    paths assume `mappings/` is a sibling of `scripts/`).
@@ -80,5 +80,5 @@ existing `mapping.yml` format and paste directly.
 
 ## Credits
 
-- [PlexAniBridge](https://github.com/eliasbenb/PlexAniBridge) by eliasbenb
-- Inspired by mappings from [eliasbenb](https://github.com/eliasbenb/PlexAniBridge-Mappings) and [LuceoEtzio](https://github.com/LuceoEtzio/PlexAniBridge-Custom-Mappings)
+- [PlexAniBridge](https://github.com/anibridge/anibridge) by eliasbenb
+- Inspired by mappings from [eliasbenb](https://github.com/anibridge/anibridge-mappings) and [LuceoEtzio](https://github.com/LuceoEtzio/PlexAniBridge-Custom-Mappings)
