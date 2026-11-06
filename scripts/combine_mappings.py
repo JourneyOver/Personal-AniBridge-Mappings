@@ -23,14 +23,17 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 import time
+from collections.abc import Iterator
 from dataclasses import asdict, dataclass, replace
+from functools import lru_cache
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
-import yaml
+import yamlrocks.compat as yaml
 
 # === Configuration ==========================================================
 
@@ -116,7 +119,7 @@ class Diagnostics:
 # === Key types ==============================================================
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class SourceKey:
     """A parsed AniBridge source key (``provider_kind:id[:sN]``)."""
 
@@ -125,41 +128,42 @@ class SourceKey:
     id: str
     season: int | None = None
 
-    @classmethod
-    def parse(cls, text: object) -> SourceKey | None:
-        if not isinstance(text, str):
-            return None
-        match = SOURCE_RE.fullmatch(text)
-        if match is None:
-            return None
-        season = match["season"]
-        return cls(
-            match["provider"],
-            match["kind"],
-            match["id"],
-            int(season) if season is not None else None,
-        )
-
     def __str__(self) -> str:
         key = f"{self.provider}_{self.kind}:{self.id}"
         return key if self.season is None else f"{key}:s{self.season}"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class TargetKey:
     """A parsed CrossWatch-compatible target key (``namespace:id[:...]``)."""
 
     namespace: str
     id: str
 
-    @classmethod
-    def parse(cls, text: object) -> TargetKey | None:
-        if not isinstance(text, str):
-            return None
-        match = TARGET_RE.fullmatch(text)
-        if match is None:
-            return None
-        return cls(match["namespace"], match["id"])
+
+# Keys are parsed in several pipeline stages; the cache makes that free.
+@lru_cache(maxsize=None)
+def _parse_source(text: str) -> SourceKey | None:
+    match = SOURCE_RE.fullmatch(text)
+    if match is None:
+        return None
+    season = match["season"]
+    return SourceKey(
+        match["provider"],
+        match["kind"],
+        match["id"],
+        int(season) if season is not None else None,
+    )
+
+
+@lru_cache(maxsize=None)
+def _parse_target_key(text: str) -> TargetKey | None:
+    match = TARGET_RE.fullmatch(text)
+    return None if match is None else TargetKey(match["namespace"], match["id"])
+
+
+def parse_source(text: object) -> SourceKey | None:
+    return _parse_source(text) if isinstance(text, str) else None
 
 
 def parse_target(text: object) -> TargetKey | SourceKey | None:
@@ -169,8 +173,9 @@ def parse_target(text: object) -> TargetKey | SourceKey | None:
     * ``SourceKey``  - a "swap" target: a valid AniBridge source reference.
     * ``None``       - malformed / unsupported.
     """
-    target = TargetKey.parse(text)
-    return target if target is not None else SourceKey.parse(text)
+    if not isinstance(text, str):
+        return None
+    return _parse_target_key(text) or _parse_source(text)
 
 
 def is_internal_key(key: object) -> bool:
@@ -201,7 +206,7 @@ def parse_range(value: Any) -> tuple[int, int]:
     return start, end
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EpisodeSpan:
     """One validated ``source range -> target range`` pair."""
 
@@ -247,7 +252,7 @@ def parse_episode_map(
 # === Catalog: discovery, loading, swap expansion ============================
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Entry:
     """One source key's targets plus where it came from."""
 
@@ -265,7 +270,7 @@ def iter_mapping_files(paths: Paths, diag: Diagnostics) -> Iterator[tuple[Path, 
         type_dir = paths.root / type_name
         if not type_dir.is_dir():
             continue
-        for folder in sorted(type_dir.iterdir(), key=lambda p: p.name):
+        for folder in sorted(type_dir.iterdir()):
             if not folder.is_dir():
                 continue
             mapping_file = folder / "mapping.yml"
@@ -275,29 +280,37 @@ def iter_mapping_files(paths: Paths, diag: Diagnostics) -> Iterator[tuple[Path, 
             yield mapping_file, folder.name
 
 
+def _read_mapping(mapping_file: Path, diag: Diagnostics) -> dict | None:
+    """Load one mapping file; report problems and return ``None`` on failure."""
+    try:
+        data = yaml.safe_load(mapping_file.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        diag.error(f"failed to parse {mapping_file}: {exc}")
+        return None
+    except OSError as exc:
+        diag.error(f"cannot read {mapping_file}: {exc}")
+        return None
+
+    if not data:
+        diag.warn(f"{mapping_file} is empty; skipping")
+        return None
+    if not isinstance(data, dict):
+        diag.error(
+            f"{mapping_file} must contain a YAML mapping at the top level "
+            f"(got {type(data).__name__})"
+        )
+        return None
+    return data
+
+
 def load_catalog(paths: Paths, diag: Diagnostics) -> Catalog:
     """Merge every mapping file into one catalog (first occurrence wins)."""
     catalog: Catalog = {}
 
     for mapping_file, title in iter_mapping_files(paths, diag):
         print(f"Processing {mapping_file}")
-        try:
-            data = yaml.safe_load(mapping_file.read_text(encoding="utf-8"))
-        except yaml.YAMLError as exc:
-            diag.error(f"failed to parse {mapping_file}: {exc}")
-            continue
-        except OSError as exc:
-            diag.error(f"cannot read {mapping_file}: {exc}")
-            continue
-
-        if not data:
-            diag.warn(f"{mapping_file} is empty; skipping")
-            continue
-        if not isinstance(data, dict):
-            diag.error(
-                f"{mapping_file} must contain a YAML mapping at the top level "
-                f"(got {type(data).__name__})"
-            )
+        data = _read_mapping(mapping_file, diag)
+        if data is None:
             continue
 
         for source_key, targets in data.items():
@@ -341,13 +354,14 @@ def expand_swap_sources(catalog: Catalog, diag: Diagnostics) -> Catalog:
             if isinstance(parsed, TargetKey):
                 real_targets[target_key] = episode_map
             elif isinstance(parsed, SourceKey):
-                if str(parsed) == source_key:
+                swap_key = str(parsed)
+                if swap_key == source_key:
                     diag.warn(
                         f"source {source_key!r} references itself as a swap "
                         f"target; skipping swap"
                     )
                     continue
-                swaps.append((str(parsed), episode_map))
+                swaps.append((swap_key, episode_map))
 
         for swap_key, episode_map in swaps:
             if swap_key in expanded:
@@ -368,17 +382,6 @@ def expand_swap_sources(catalog: Catalog, diag: Diagnostics) -> Catalog:
 # === Combined output rendering ==============================================
 
 
-class _NoAliasDumper(yaml.SafeDumper):
-    """YAML dumper that never emits anchors/aliases (``&id001`` / ``*id001``).
-
-    Swap entries reuse the originals' episode-map dicts, so the default dumper
-    would emit references, which make diffs and hand-edits harder.
-    """
-
-    def ignore_aliases(self, data: Any) -> bool:
-        return True
-
-
 def _public_targets(targets: Any) -> Any:
     """Drop CrossWatch-only targets (e.g. kitsu) from a targets dict."""
     if not isinstance(targets, dict):
@@ -393,15 +396,15 @@ def _public_targets(targets: Any) -> Any:
     }
 
 
-def _public_payload(catalog: Catalog) -> dict[str, Any]:
+def public_payload(catalog: Catalog) -> dict[str, Any]:
+    """The AniBridge-facing view of the catalog (built once, rendered twice)."""
     return {key: _public_targets(entry.targets) for key, entry in catalog.items()}
 
 
-def render_combined_yaml(catalog: Catalog) -> str:
+def render_combined_yaml(payload: dict[str, Any]) -> str:
     header = f"# yaml-language-server: $schema={SCHEMA_URL}\n\n"
-    body = yaml.dump(
-        {"$meta": COMBINED_META, **_public_payload(catalog)},
-        Dumper=_NoAliasDumper,
+    body = yaml.safe_dump(
+        {"$meta": COMBINED_META, **payload},
         default_flow_style=False,
         allow_unicode=True,
         sort_keys=False,
@@ -409,15 +412,15 @@ def render_combined_yaml(catalog: Catalog) -> str:
     return header + body
 
 
-def render_combined_json(catalog: Catalog) -> str:
-    payload = {"$schema": SCHEMA_URL, "$meta": COMBINED_META, **_public_payload(catalog)}
-    return json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n"
+def render_combined_json(payload: dict[str, Any]) -> str:
+    document = {"$schema": SCHEMA_URL, "$meta": COMBINED_META, **payload}
+    return json.dumps(document, ensure_ascii=False, separators=(",", ":")) + "\n"
 
 
 # === CrossWatch overrides ===================================================
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class RuleIdentity:
     """The fields that define *which* rule this is (hashed into its ID)."""
 
@@ -431,12 +434,13 @@ class RuleIdentity:
     target_namespace: str
     target_id: str
 
-    def override_id(self) -> str:
-        payload = json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
-        return "ovr_" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
+
+def _rule_id(identity_fields: dict[str, Any]) -> str:
+    payload = json.dumps(identity_fields, sort_keys=True, separators=(",", ":"))
+    return "ovr_" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Override:
     """A single CrossWatch override rule (field order = JSON key order)."""
 
@@ -458,14 +462,15 @@ class Override:
 
     @classmethod
     def create(cls, identity: RuleIdentity, *, title: str, timestamp: int) -> Override:
+        fields = asdict(identity)
         return cls(
-            id=identity.override_id(),
+            id=_rule_id(fields),
             created_at=timestamp,
             updated_at=timestamp,
             enabled=True,
             title=title,
             note="",
-            **asdict(identity),
+            **fields,
         )
 
 
@@ -477,19 +482,24 @@ class OverrideGenerator:
         self.timestamp = timestamp
 
     def generate(self, catalog: Catalog) -> list[Override]:
-        """Convert the whole catalog; duplicate rule IDs collapse to one."""
+        """Convert the whole catalog; duplicate rule IDs collapse to the first."""
         by_id: dict[str, Override] = {}
         for source_key, entry in catalog.items():
             for override in self._convert(source_key, entry):
-                by_id[override.id] = override
+                by_id.setdefault(override.id, override)
         return list(by_id.values())  # insertion order -> stable diffs
+
+    def _make(self, title: str, **identity: Any) -> Override:
+        return Override.create(
+            RuleIdentity(**identity), title=title, timestamp=self.timestamp
+        )
 
     # -- per source ---------------------------------------------------------
 
     def _convert(self, source_key: str, entry: Entry) -> list[Override]:
         diag, origin = self.diag, entry.origin
 
-        source = SourceKey.parse(source_key)
+        source = parse_source(source_key)
         if source is None:
             diag.warn(f"unrecognized AniBridge source key: {source_key!r} in {origin}")
             return []
@@ -512,6 +522,7 @@ class OverrideGenerator:
             )
             return []
 
+        convert = self._movie if source.kind == "movie" else self._show
         overrides: list[Override] = []
         for target_key, episode_map in entry.targets.items():
             target = parse_target(target_key)
@@ -532,12 +543,7 @@ class OverrideGenerator:
                 diag.warn(f"{label}: empty episode mapping; skipping")
                 continue
 
-            if source.kind == "movie":
-                override = self._movie(source, target, entry.title, episode_map, label)
-                if override is not None:
-                    overrides.append(override)
-            else:
-                overrides.extend(self._show(source, target, entry.title, episode_map, label))
+            overrides.extend(convert(source, target, entry.title, episode_map, label))
         return overrides
 
     # -- per media type -----------------------------------------------------
@@ -549,11 +555,11 @@ class OverrideGenerator:
         title: str,
         episode_map: dict,
         label: str,
-    ) -> Override | None:
+    ) -> list[Override]:
         """One ID-only override; CrossWatch movies carry no episode data."""
         spans, had_error = parse_episode_map(episode_map, label=label, diag=self.diag)
         if had_error or not spans:
-            return None
+            return []
 
         if not (len(spans) == 1 and spans[0].is_first_episode_identity):
             self.diag.warn(
@@ -562,18 +568,20 @@ class OverrideGenerator:
                 f"Creating an ID-only movie override."
             )
 
-        identity = RuleIdentity(
-            media_type="movie",
-            match_provider=source.provider,
-            match_id=source.id,
-            match_season=None,
-            episode_from=None,
-            episode_to=None,
-            episode_start_at=None,
-            target_namespace=target.namespace,
-            target_id=target.id,
-        )
-        return Override.create(identity, title=title, timestamp=self.timestamp)
+        return [
+            self._make(
+                title,
+                media_type="movie",
+                match_provider=source.provider,
+                match_id=source.id,
+                match_season=None,
+                episode_from=None,
+                episode_to=None,
+                episode_start_at=None,
+                target_namespace=target.namespace,
+                target_id=target.id,
+            )
+        ]
 
     def _show(
         self,
@@ -586,20 +594,17 @@ class OverrideGenerator:
         """One override per valid source/target episode-range pair."""
         spans, _ = parse_episode_map(episode_map, label=label, diag=self.diag)
         return [
-            Override.create(
-                RuleIdentity(
-                    media_type="show",
-                    match_provider=source.provider,
-                    match_id=source.id,
-                    match_season=source.season,
-                    episode_from=span.src_start,
-                    episode_to=span.src_end,
-                    episode_start_at=span.tgt_start,
-                    target_namespace=target.namespace,
-                    target_id=target.id,
-                ),
-                title=title,
-                timestamp=self.timestamp,
+            self._make(
+                title,
+                media_type="show",
+                match_provider=source.provider,
+                match_id=source.id,
+                match_season=source.season,
+                episode_from=span.src_start,
+                episode_to=span.src_end,
+                episode_start_at=span.tgt_start,
+                target_namespace=target.namespace,
+                target_id=target.id,
             )
             for span in spans
         ]
@@ -608,7 +613,7 @@ class OverrideGenerator:
 # === Reconciling with the previous run ======================================
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class PreviousRun:
     """What the last run wrote to ``crosswatch-overrides.json``."""
 
@@ -619,10 +624,10 @@ class PreviousRun:
     def load(cls, path: Path, diag: Diagnostics) -> PreviousRun:
         """Permissive read: a missing/corrupt file just means "no history"."""
         empty = cls([], None)
-        if not path.is_file():
-            return empty
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return empty
         except (json.JSONDecodeError, OSError) as exc:
             diag.warn(
                 f"could not read existing overrides from {path}: {exc}; treating as empty"
@@ -660,22 +665,22 @@ def reconcile(
     * The top-level ``updated_at`` only moves when something actually changed.
     """
     previous_by_id = {rule["id"]: rule for rule in previous.rules}
-    result: list[Override] = []
+    rules: list[dict[str, Any]] = []
 
     for override in overrides:
+        rule = asdict(override)
         old = previous_by_id.get(override.id)
         if old is not None:
             if isinstance(old.get("created_at"), int):
-                override = replace(override, created_at=old["created_at"])
+                rule["created_at"] = old["created_at"]
             if (
                 not refresh_timestamps
                 and isinstance(old.get("updated_at"), int)
-                and _content(old) == _content(asdict(override))
+                and _content(old) == _content(rule)
             ):
-                override = replace(override, updated_at=old["updated_at"])
-        result.append(override)
+                rule["updated_at"] = old["updated_at"]
+        rules.append(rule)
 
-    rules = [asdict(o) for o in result]
     unchanged = (
         not refresh_timestamps
         and previous.updated_at is not None
@@ -694,20 +699,33 @@ def render_overrides(payload: dict[str, Any]) -> str:
 # === I/O ====================================================================
 
 
-def write_text_atomic(path: Path, text: str) -> None:
-    """Write via a temp file + rename so a crash never leaves a partial file."""
+def write_text_atomic(path: Path, text: str) -> bool:
+    """Write via temp file + rename; skip the write if content is unchanged.
+
+    Returns ``True`` if the file was (re)written.
+    """
+    try:
+        if path.read_text(encoding="utf-8") == text:
+            return False
+    except (FileNotFoundError, UnicodeDecodeError):
+        pass
+
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
-    with tmp.open("w", encoding="utf-8", newline="\n") as handle:
-        handle.write(text)
-    tmp.replace(path)
+    try:
+        with tmp.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return True
 
 
 # === Entry point ============================================================
 
 
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     parser.add_argument(
         "--root",
         type=Path,
@@ -730,20 +748,20 @@ def main(argv: list[str] | None = None) -> int:
 
     catalog = expand_swap_sources(load_catalog(paths, diag), diag)
 
-    write_text_atomic(paths.combined_yaml, render_combined_yaml(catalog))
+    payload = public_payload(catalog)
+    write_text_atomic(paths.combined_yaml, render_combined_yaml(payload))
     print(f"Combined mappings written to {paths.combined_yaml}")
-
-    write_text_atomic(paths.combined_json, render_combined_json(catalog))
+    write_text_atomic(paths.combined_json, render_combined_json(payload))
     print(f"Combined minified JSON written to {paths.combined_json}")
 
     overrides = OverrideGenerator(diag, timestamp).generate(catalog)
-    payload = reconcile(
+    result = reconcile(
         overrides,
         PreviousRun.load(paths.overrides, diag),
         timestamp=timestamp,
         refresh_timestamps=args.refresh_timestamps,
     )
-    write_text_atomic(paths.overrides, render_overrides(payload))
+    write_text_atomic(paths.overrides, render_overrides(result))
     print(f"CrossWatch overrides written to {paths.overrides} ({len(overrides)} rules)")
 
     print(
